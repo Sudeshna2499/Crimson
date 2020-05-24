@@ -9,6 +9,7 @@ public class AuditOrder extends OrderType{
     private Critical criticalType;
     private Scheduled scheduledType;
     private int numQuarters;
+    private double cost;
 
     public AuditOrder(int id, int client, LocalDateTime date, double criticalLoading,
                       int maxCountedEmployees, Critical criticalType, Scheduled scheduledType, int numQuarters) {
@@ -16,6 +17,7 @@ public class AuditOrder extends OrderType{
         this.criticalType=criticalType;
         this.scheduledType=scheduledType;
         this.numQuarters=numQuarters;
+        this.cost=0.0;
     }
 
     @Override
@@ -25,12 +27,16 @@ public class AuditOrder extends OrderType{
             cost += reports.get(report) * report.getCommission();
         }
         cost +=criticalType.getTotalCommission(cost);
-        return cost*scheduledType.getNumQuarters();
+        if(scheduledType instanceof ScheduledImpl){
+            return cost*numQuarters;
+        }
+        return cost;
     }
 
     @Override
     public String generateInvoiceData() {
-        return criticalType.generateInvoiceData(reports, getTotalCommission(), numQuarters, scheduledType, getRecurringCost());
+       // return scheduledType.generateInvoiceData(getRecurringCost(),numQuarters,getTotalCommission());
+        return criticalType.generateInvoiceData(reports, getTotalCommission(), numQuarters, scheduledType, getRecurringCost(), maxCountedEmployees, this);
     }
 
     @Override
@@ -43,15 +49,12 @@ public class AuditOrder extends OrderType{
 
     @Override
     public String longDesc() {
-        if(scheduledType instanceof ScheduledImpl){
-            return scheduledType.longDesc(reports,getTotalCommission(),id,date,finalised, criticalType);
-        }
-        return criticalType.longDesc(reports, finalised, id, date, scheduledType.getTotalCommission(getTotalCommission()), scheduledType);
+        return scheduledType.longDesc(reports,getTotalCommission(),id,date,finalised, criticalType, this, maxCountedEmployees);
     }
 
     @Override
     public double getRecurringCost() {
-        return getTotalCommission();
+        return getTotalCommission()/numQuarters;
     }
 
     @Override

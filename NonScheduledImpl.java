@@ -27,7 +27,9 @@ public class NonScheduledImpl implements Scheduled {
     }
 
     @Override
-    public String longDesc(Map<Report, Integer> reports, double commission, int id, LocalDateTime date, boolean finalised, Critical criticalType) {
+    public String longDesc(Map<Report, Integer> reports, double commission,
+                           int id, LocalDateTime date, boolean finalised,
+                           Critical criticalType, OrderType type, int maxCountedEmployees) {
         double baseCommission = 0.0;
         double loadedCommission = commission;
         StringBuilder reportSB = new StringBuilder();
@@ -46,19 +48,36 @@ public class NonScheduledImpl implements Scheduled {
                     subtotal));
         }
 
-        return String.format(finalised ? "" : "*NOT FINALISED*\n" +
-                        "Order details (id #%d)\n" +
-                        "Date: %s\n" +
-                        "Reports:\n" +
-                        "%s" +
-                        "Critical Loading: $%,.2f\n" +
-                        "Total cost: $%,.2f\n",
-                id,
-                date.format(DateTimeFormatter.ISO_LOCAL_DATE),
-                reportSB.toString(),
-                loadedCommission - baseCommission,
-                loadedCommission
-        );
+        if(criticalType instanceof CriticalImpl){
+            return String.format(finalised ? "" : "*NOT FINALISED*\n" +
+                            "Order details (id #%d)\n" +
+                            "Date: %s\n" +
+                            "Reports:\n" +
+                            "%s" +
+                            "Critical Loading: $%,.2f\n" +
+                            "Total cost: $%,.2f\n",
+                    id,
+                    date.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                    reportSB.toString(),
+                    loadedCommission - baseCommission,
+                    loadedCommission
+            );
+        }
+        else{
+            return String.format(finalised ? "" : "*NOT FINALISED*\n" +
+                            "Order details (id #%d)\n" +
+                            "Date: %s\n" +
+                            "Reports:\n" +
+                            "%s" +
+                            "Total cost: $%,.2f\n",
+                    id,
+                    date.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                    reportSB.toString(),
+                    getTotalCommission(commission)
+            );
+        }
+
+
     }
 
     @Override

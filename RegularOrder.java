@@ -33,7 +33,7 @@ public class RegularOrder extends OrderType{
     public String generateInvoiceData() {
 
         double commission = getTotalCommission();
-        return criticalType.generateInvoiceData(reports, commission, numQuarters, scheduledType,getRecurringCost());
+        return criticalType.generateInvoiceData(reports, commission, numQuarters, scheduledType,getRecurringCost(), maxCountedEmployees, this);
     }
 
     @Override
@@ -46,12 +46,12 @@ public class RegularOrder extends OrderType{
 
     @Override
     public String longDesc() {
-        return criticalType.longDesc(reports, finalised, id, date, getTotalCommission(), scheduledType);
+        return scheduledType.longDesc(reports,getTotalCommission(),id,date,finalised, criticalType, this, maxCountedEmployees);
     }
 
     @Override
     public double getRecurringCost() {
-        return 0;
+        return getTotalCommission()/numQuarters;
     }
 
     @Override
